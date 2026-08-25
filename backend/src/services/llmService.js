@@ -10,7 +10,8 @@ export async function generateResponse({
     message,
     personality,
     tanmay,
-    profile
+    profile,
+    history
 }) {
     const systemPrompt = `
 ${personality}
@@ -35,15 +36,16 @@ IMPORTANT:
     const response = await client.chat.completions.create({
         model: "nvidia/nemotron-3.5-lightning:free",
         messages: [
-            {
-                role: "system",
-                content: systemPrompt
-            },
-            {
-                role: "user",
-                content: message
-            }
-        ]
+    {
+        role: "system",
+        content: systemPrompt
+    },
+    ...history,
+    {
+        role: "user",
+        content: message
+    }
+]
     });
 
     return response.choices[0].message.content;
