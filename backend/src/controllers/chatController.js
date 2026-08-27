@@ -9,39 +9,58 @@ import { tanmayPersonality } from "../prompts/personality.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const tanmayPath = path.join(__dirname, "../../../data/private/tanmay.json");
+let tanmay;
 
-const tanmay = JSON.parse(fs.readFileSync(tanmayPath, "utf-8"));
+if (process.env.PRIVATE_PERSONAS) {
+    const profiles = JSON.parse(process.env.PRIVATE_PERSONAS);
+
+    tanmay = profiles.find(
+        (profile) => profile.relationship === "self"
+    );
+} else {
+    const tanmayPath = path.join(
+        __dirname,
+        "../../../data/private/tanmay.json"
+    );
+
+    tanmay = JSON.parse(
+        fs.readFileSync(tanmayPath, "utf-8")
+    );
+}
 
 export async function chat(req, res) {
-  try {
-    const { name, message, history } = req.body;
+    try {
+        const {
+            name,
+            message,
+            history = []
+        } = req.body;
 
-    if (!name || !message) {
-      return res.status(400).json({
-        error: "Name and message are required",
-      });
+        if (!name || !message) {
+            return res.status(400).json({
+                error: "Name and message are required"
+            });
+        }
+
+        const profile = findProfile(name);
+
+        const response = await generateResponse({
+            message,
+            personality: tanmayPersonality,
+            tanmay,
+            profile,
+            history
+        });
+
+        res.json({
+            response,
+            detectedRelationship: profile.relationship
+        });
+    } catch (error) {
+        console.error("LLM ERROR:", error);
+
+        res.status(500).json({
+            error: "Failed to generate response"
+        });
     }
-
-    const profile = findProfile(name);
-
-    const response = await generateResponse({
-      message,
-      personality: tanmayPersonality,
-      tanmay,
-      profile,
-      history,
-    });
-
-    res.json({
-      response,
-      detectedRelationship: profile.relationship,
-    });
-  } catch (error) {
-    console.error("LLM ERROR:", error);
-
-    res.status(500).json({
-      error: "Failed to generate response",
-    });
-  }
 }

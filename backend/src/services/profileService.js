@@ -10,20 +10,44 @@ const privateDataPath = path.join(
     "../../../data/private"
 );
 
-export function findProfile(name) {
-    const normalizedName = name.toLowerCase().trim();
+function getProfiles() {
+    // Production: profiles come from Render environment variable
+    if (process.env.PRIVATE_PERSONAS) {
+        try {
+            return JSON.parse(process.env.PRIVATE_PERSONAS);
+        } catch (error) {
+            console.error("Failed to parse PRIVATE_PERSONAS");
+            return [];
+        }
+    }
+
+    // Local development: read JSON files normally
+    if (!fs.existsSync(privateDataPath)) {
+        return [];
+    }
 
     const files = fs.readdirSync(privateDataPath);
 
-    for (const file of files) {
-        if (!file.endsWith(".json")) {
-            continue;
-        }
+    return files
+        .filter((file) => file.endsWith(".json"))
+        .map((file) => {
+            const filePath = path.join(privateDataPath, file);
+            return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+        });
+}
 
-        const filePath = path.join(privateDataPath, file);
-        const profile = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+export function findProfile(name) {
+    const normalizedName = name.toLowerCase().trim();
+    const profiles = getProfiles();
 
-        if (profile.aliases.includes(normalizedName)) {
+    for (const profile of profiles) {
+        const aliases = profile.aliases || [];
+
+        if (
+            aliases.some(
+                (alias) => alias.toLowerCase().trim() === normalizedName
+            )
+        ) {
             return profile;
         }
     }
