@@ -14,6 +14,12 @@ app.get("/", (req, res) => {
     });
 });
 
+app.get("/health", (req, res) => {
+    res.json({
+        status: "ok"
+    });
+});
+
 app.use("/api/chat", chatRoutes);
 
 app.listen(PORT, () => {

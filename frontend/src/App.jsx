@@ -10,6 +10,13 @@ function App() {
     const inputRef = useRef(null);
 
     useEffect(() => {
+    fetch("https://talk-to-tanmay-backend.onrender.com/health")
+        .catch(() => {
+            // Backend may still be waking up.
+        });
+}, []);
+
+    useEffect(() => {
         if (started && inputRef.current) {
             inputRef.current.focus();
         }
