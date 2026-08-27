@@ -9,12 +9,13 @@ function App() {
     const chatEndRef = useRef(null);
     const inputRef = useRef(null);
 
+    // Wake up the production backend when the site opens.
     useEffect(() => {
-    fetch("https://talk-to-tanmay-backend.onrender.com/health")
-        .catch(() => {
-            // Backend may still be waking up.
-        });
-}, []);
+        fetch("https://talk-to-tanmay-backend.onrender.com/health")
+            .catch(() => {
+                // Backend may still be waking up.
+            });
+    }, []);
 
     useEffect(() => {
         if (started && inputRef.current) {
@@ -45,17 +46,20 @@ function App() {
         setLoading(true);
 
         try {
-            const response = await fetch("http://localhost:8000/api/chat", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name,
-                    message: userMessage,
-                    history: messages.slice(-6)
-                })
-            });
+            const response = await fetch(
+                "https://talk-to-tanmay-backend.onrender.com/api/chat",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name,
+                        message: userMessage,
+                        history: messages.slice(-6)
+                    })
+                }
+            );
 
             const data = await response.json();
 
@@ -108,7 +112,7 @@ function App() {
                             autoFocus
                         />
 
-                        <button 
+                        <button
                             onClick={startChat}
                             className="welcome-button"
                             disabled={!name.trim()}
@@ -129,7 +133,9 @@ function App() {
                 <div className="header-content">
                     <div>
                         <h1 className="header-title">Talk to Tanmay</h1>
-                        <span className="header-subtitle">Chatting as {name}</span>
+                        <span className="header-subtitle">
+                            Chatting as {name}
+                        </span>
                     </div>
                 </div>
             </header>
@@ -196,8 +202,22 @@ function App() {
                         disabled={loading || !message.trim()}
                         className="send-button"
                     >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <line
+                                x1="22"
+                                y1="2"
+                                x2="11"
+                                y2="13"
+                            ></line>
                             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                         </svg>
                     </button>
