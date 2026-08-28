@@ -34,7 +34,7 @@ IMPORTANT:
 `;
 
     const response = await client.chat.completions.create({
-        model: "nvidia/nemotron-3.5-lightning:free",
+        model: "google/gemma-4-31b-it:free",
         messages: [
     {
         role: "system",
