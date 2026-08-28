@@ -6,6 +6,12 @@ const client = new OpenAI({
     apiKey: OPENROUTER_API_KEY
 });
 
+const MODELS = [
+    "google/gemma-4-31b-it:free",
+    "minimax/minimax-m3:free",
+    "z-ai/glm-5.2:free"
+];
+
 export async function generateResponse({
     message,
     personality,
@@ -33,20 +39,37 @@ IMPORTANT:
 - Do not invent memories or facts that are not provided.
 `;
 
-    const response = await client.chat.completions.create({
-        model: "google/gemma-4-31b-it:free",
-        messages: [
-    {
-        role: "system",
-        content: systemPrompt
-    },
-    ...history,
-    {
-        role: "user",
-        content: message
-    }
-]
-    });
+    for (const model of MODELS) {
+        try {
+            console.log(`Trying model: ${model}`);
 
-    return response.choices[0].message.content;
+            const response = await client.chat.completions.create({
+                model,
+                messages: [
+                    {
+                        role: "system",
+                        content: systemPrompt
+                    },
+                    ...history,
+                    {
+                        role: "user",
+                        content: message
+                    }
+                ]
+            });
+
+            const content = response?.choices?.[0]?.message?.content;
+
+            if (content) {
+                console.log(`Model succeeded: ${model}`);
+                return content;
+            }
+
+            console.error(`Model returned no content: ${model}`);
+        } catch (error) {
+            console.error(`Model failed: ${model}`, error.status || error.message);
+        }
+    }
+
+    throw new Error("All LLM models failed");
 }
