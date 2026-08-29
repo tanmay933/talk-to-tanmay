@@ -181,4 +181,4 @@ For now, the goal is to keep the project small, understandable, and actually use
 
 **Tanmay Mittal**
 
-Built as a personal project to experiment with AI personas, conversational context, and full-stack deployment.
+Built as a fun personal project to experiment with AI personas, conversational context, and full-stack deployment.
